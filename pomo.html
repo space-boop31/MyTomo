@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cute Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background-color: #FFEBEE;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #D32F2F;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #D32F2F;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #D32F2F;
+        }
+
+        .tomato-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+        }
+
+        .tomato {
+            width: 180px;
+            height: 180px;
+            background-color: #F44336;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(244, 67, 54, 0.3);
+            animation: bounce 2s infinite alternate;
+        }
+
+        .tomato::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+        }
+
+        .face {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 80px;
+        }
+
+        .eyes {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .eye {
+            width: 20px;
+            height: 25px;
+            background-color: white;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s infinite;
+        }
+
+        .eye::after {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 10px;
+            height: 10px;
+            background-color: #333;
+            border-radius: 50%;
+        }
+
+        .mouth {
+            width: 40px;
+            height: 20px;
+            margin: 0 auto;
+            border-bottom: 4px solid #333;
+            border-radius: 0 0 50% 50%;
+            transition: all 0.3s ease;
+        }
+
+        .mouth.surprised {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 4px solid #333;
+            background-color: white;
+        }
+
+        .mouth.sleepy {
+            width: 40px;
+            height: 5px;
+            border-top: 4px solid #333;
+            border-bottom: none;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        #start-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #reset-btn {
+            background-color: #FFC107;
+            color: #333;
+        }
+
+        #pause-btn {
+            background-color: #2196F3;
+            color: white;
+            display: none;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: #E57373;
+            color: white;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn.active {
+            background-color: #D32F2F;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #FFCDD2;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #D32F2F;
+            border-radius: 5px;
+            width: 100%;
+            transition: width 0.5s linear;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% { height: 25px; }
+            50% { height: 5px; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pomodoro Timer</h1>
+        
+        <div class="tomato-container">
+            <div class="tomato">
+                <div class="face">
+                    <div class="eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
+                    </div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timer-display" id="time">25:00</div>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" id="pomodoro-btn">Pomodoro</button>
+            <button class="mode-btn" id="short-break-btn">Short Break</button>
+            <button class="mode-btn" id="long-break-btn">Long Break</button>
+        </div>
+        
+        <div class="controls">
+            <button id="start-btn">Start</button>
+            <button id="pause-btn">Pause</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const timeDisplay = document.getElementById('time');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const pomodoroBtn = document.getElementById('pomodoro-btn');
+        const shortBreakBtn = document.getElementById('short-break-btn');
+        const longBreakBtn = document.getElementById('long-break-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const mouth = document.querySelector('.mouth');
+        const tomato = document.querySelector('.tomato');
+        const eyes = document.querySelectorAll('.eye');
+
+        // Timer variables
+        let timer;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let totalTime = 25 * 60;
+        let isRunning = false;
+        let currentMode = 'pomodoro'; // 'pomodoro', 'shortBreak', 'longBreak'
+        let pomodoroCount = 0;
+
+        // Mode settings
+        const modes = {
+            pomodoro: { time: 25 * 60, color: '#D32F2F' },
+            shortBreak: { time: 5 * 60, color: '#388E3C' },
+            longBreak: { time: 15 * 60, color: '#1976D2' }
+        };
+
+        // Initialize the timer
+        function init() {
+            updateDisplay();
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            
+            pomodoroBtn.addEventListener('click', () => switchMode('pomodoro'));
+            shortBreakBtn.addEventListener('click', () => switchMode('shortBreak'));
+            longBreakBtn.addEventListener('click', () => switchMode('longBreak'));
+        }
+
+        // Switch between timer modes
+        function switchMode(mode) {
+            currentMode = mode;
+            resetTimer();
+            
+            // Update active button
+            pomodoroBtn.classList.remove('active');
+            shortBreakBtn.classList.remove('active');
+            longBreakBtn.classList.remove('active');
+            
+            if (mode === 'pomodoro') {
+                pomodoroBtn.classList.add('active');
+                document.body.style.backgroundColor = '#FFEBEE';
+                tomato.style.backgroundColor = '#F44336';
+            } else if (mode === 'shortBreak') {
+                shortBreakBtn.classList.add('active');
+                document.body.style.backgroundColor = '#E8F5E9';
+                tomato.style.backgroundColor = '#4CAF50';
+            } else {
+                longBreakBtn.classList.add('active');
+                document.body.style.backgroundColor = '#E3F2FD';
+                tomato.style.backgroundColor = '#2196F3';
+            }
+            
+            // Change tomato expression for breaks
+            if (mode === 'shortBreak' || mode === 'longBreak') {
+                mouth.classList.add('surprised');
+                mouth.classList.remove('sleepy');
+                tomato.classList.add('pulse');
+            } else {
+                mouth.classList.remove('surprised');
+                tomato.classList.remove('pulse');
+            }
+        }
+
+        // Start the timer
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                
+                // Change expression when timer starts
+                mouth.classList.remove('surprised');
+                mouth.classList.remove('sleepy');
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        timerComplete();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Pause the timer
+        function pauseTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timer);
+                startBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                
+                // Change to sleepy face when paused
+                mouth.classList.add('sleepy');
+                mouth.classList.remove('surprised');
+            }
+        }
+
+        // Reset the timer
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = modes[currentMode].time;
+            totalTime = modes[currentMode].time;
+            updateDisplay();
+            
+            // Reset face to normal
+            mouth.classList.remove('surprised');
+            mouth.classList.remove('sleepy');
+            tomato.classList.remove('pulse');
+        }
+
+        // When timer completes
+        function timerComplete() {
+            isRunning = false;
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            
+            // Play notification sound
+            playSound();
+            
+            // Update pomodoro count and switch mode if needed
+            if (currentMode === 'pomodoro') {
+                pomodoroCount++;
+                
+                // Blink eyes to show completion
+                eyes.forEach(eye => {
+                    eye.style.animation = 'none';
+                    setTimeout(() => {
+                        eye.style.animation = 'blink 0.5s 3';
+                    }, 10);
+                });
+                
+                // After 4 pomodoros, take a long break
+                if (pomodoroCount % 4 === 0) {
+                    setTimeout(() => switchMode('longBreak'), 1000);
+                } else {
+                    setTimeout(() => switchMode('shortBreak'), 1000);
+                }
+            } else {
+                setTimeout(() => switchMode('pomodoro'), 1000);
+            }
+        }
+
+        // Play notification sound
+        function playSound() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            audio.play();
+        }
+
+        // Update the time display
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update progress bar
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressBar.style.backgroundColor = modes[currentMode].color;
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
